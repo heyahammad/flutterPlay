@@ -4,7 +4,7 @@ import 'package:rannaghor/screens/main_drawer.dart';
 import 'package:rannaghor/screens/meals.dart';
 import 'package:rannaghor/screens/filter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rannaghor/provider/meals_provider.dart';
+
 import 'package:rannaghor/provider/favourite_provider.dart';
 import 'package:rannaghor/provider/filter_provider.dart';
 
