@@ -1,3 +1,4 @@
+import 'package:cartup/yourgroceries.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,7 +23,7 @@ class Main extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(title: Text('CartUp')),
-        body: Center(),
+        body: YourGroceries(),
       ),
     );
   }
