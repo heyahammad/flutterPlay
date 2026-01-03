@@ -1,4 +1,4 @@
-import 'package:cartup/yourgroceries.dart';
+import 'package:cartup/widgets/yourgroceries.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,10 +21,7 @@ class Main extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Color.fromARGB(255, 50, 58, 60),
       ),
-      home: Scaffold(
-        appBar: AppBar(title: Text('CartUp')),
-        body: YourGroceries(),
-      ),
+      home: Scaffold(body: YourGroceries()),
     );
   }
 }
