@@ -28,22 +28,25 @@ class _PlaceListState extends State<PlaceList> {
     return ListView.builder(
       itemCount: place.length,
       itemBuilder: (context, index) {
-        return InkWell(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  PlaceScreen(name: place[index].title, id: place[index].id),
-            ),
+        return Padding(
+          padding: const EdgeInsets.only(
+            left: 10,
+            right: 10,
+            bottom: 5,
+            top: 5,
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: 10,
-              right: 10,
-              bottom: 5,
-              top: 5,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              focusColor: Theme.of(context).splashColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PlaceScreen(
+                    name: place[index].title,
+                    id: place[index].id,
+                  ),
+                ),
+              ),
               child: Dismissible(
                 key: ValueKey(place[index].id),
                 direction: DismissDirection.endToStart,

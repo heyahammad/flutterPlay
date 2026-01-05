@@ -32,6 +32,7 @@ class _PlaceAddState extends State<PlaceAdd> {
                   if (value == null || value.isEmpty || value.length >= 50) {
                     return 'Please enter a place name (1-50)';
                   }
+                  return null;
                 },
               ),
               SizedBox(height: 10),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:native_features/screen/place_add.dart';
 import 'package:native_features/screen/places.dart';
-import 'package:native_features/widgets/place_list.dart';
 
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
