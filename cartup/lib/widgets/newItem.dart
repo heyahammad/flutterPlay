@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:cartup/models/groceryItem.dart';
 import 'package:flutter/material.dart';
 import 'package:cartup/data/categories.dart';
@@ -16,14 +17,48 @@ class _NewItemState extends State<NewItem> {
   var _itemname = '';
   var _itemQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
+  bool _isSaving = false;
 
-  void _save() {
+  final _url = Uri.https(
+    'trial-faisal-default-rtdb.asia-southeast1.firebasedatabase.app',
+    '/groceryItems.json',
+  );
+
+  void _save() async {
     if (_keyForm.currentState!.validate()) {
       _keyForm.currentState!.save();
+      setState(() {
+        _isSaving = true;
+      });
+
+      final response = await http.post(
+        _url,
+        body: jsonEncode({
+          'name': _itemname,
+          'quantity': _itemQuantity.toString(),
+          'category': _selectedCategory.name,
+        }),
+      );
+
+      if (response.statusCode >= 400) {
+        setState(() {
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add item. Please try again.')),
+        );
+        return;
+      }
+      if (response.statusCode == 200) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+
       Navigator.of(context).pop(
         GroceryItem(
           category: _selectedCategory,
-          id: DateTime.now.toString(),
+          id: jsonDecode(response.body)['name'],
           name: _itemname,
           quantity: _itemQuantity.toDouble(),
         ),
@@ -37,96 +72,102 @@ class _NewItemState extends State<NewItem> {
       appBar: AppBar(title: Text('Add New Item')),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: Form(
-          key: _keyForm,
-          child: Column(
-            children: [
-              TextFormField(
-                initialValue: _itemname,
-                decoration: InputDecoration(labelText: 'Item Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty || value.length > 50) {
-                    return 'Please enter a valid name (1-50 characters).';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _itemname = value!;
-                },
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: _itemQuantity.toString(),
-                      decoration: InputDecoration(label: Text('Quantity')),
-                      keyboardType: TextInputType.number,
-                      keyboardAppearance: Brightness.dark,
+        child: _isSaving
+            ? Center(child: CircularProgressIndicator())
+            : Form(
+                key: _keyForm,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      initialValue: _itemname,
+                      decoration: InputDecoration(labelText: 'Item Name'),
                       validator: (value) {
                         if (value == null ||
                             value.isEmpty ||
-                            int.tryParse(value) == null ||
-                            int.parse(value) <= 0) {
-                          return 'Please enter a valid quantity.';
+                            value.length > 50) {
+                          return 'Please enter a valid name (1-50 characters).';
                         }
                         return null;
                       },
                       onSaved: (value) {
-                        _itemQuantity = int.tryParse(value!)!;
+                        _itemname = value!;
                       },
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButtonFormField(
-                      value: _selectedCategory,
-                      items: [
-                        for (final category in categories.entries)
-                          DropdownMenuItem(
-                            value: category.value,
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 16,
-                                  height: 16,
-                                  color: category.value.color,
-                                ),
-                                SizedBox(width: 6),
-                                Text(category.value.name),
-                              ],
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _itemQuantity.toString(),
+                            decoration: InputDecoration(
+                              label: Text('Quantity'),
                             ),
+                            keyboardType: TextInputType.number,
+                            keyboardAppearance: Brightness.dark,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  int.tryParse(value) == null ||
+                                  int.parse(value) <= 0) {
+                                return 'Please enter a valid quantity.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _itemQuantity = int.tryParse(value!)!;
+                            },
                           ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: DropdownButtonFormField(
+                            value: _selectedCategory,
+                            items: [
+                              for (final category in categories.entries)
+                                DropdownMenuItem(
+                                  value: category.value,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 16,
+                                        height: 16,
+                                        color: category.value.color,
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(category.value.name),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                            onChanged: (value) {
+                              _selectedCategory = value!;
+                            },
+                          ),
+                        ),
                       ],
-                      onChanged: (value) {
-                        _selectedCategory = value!;
-                      },
                     ),
-                  ),
-                ],
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            _keyForm.currentState!.reset();
+                          },
+                          child: Text('Reset'),
+                        ), //reset button
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            _save();
+                          },
+                          child: Text("Add Item"),
+                        ), //add item button
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      _keyForm.currentState!.reset();
-                    },
-                    child: Text('Reset'),
-                  ), //reset button
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      _save();
-                    },
-                    child: Text("Add Item"),
-                  ), //add item button
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
