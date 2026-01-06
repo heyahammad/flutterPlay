@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:native_features/model/place.dart';
+import 'package:native_features/provider/place_provider.dart';
 
-class PlaceAdd extends StatefulWidget {
+class PlaceAdd extends ConsumerStatefulWidget {
   const PlaceAdd({super.key});
 
   @override
-  State<PlaceAdd> createState() => _PlaceAddState();
+  ConsumerState<PlaceAdd> createState() => _PlaceAddState();
 }
 
-class _PlaceAddState extends State<PlaceAdd> {
+class _PlaceAddState extends ConsumerState<PlaceAdd> {
   final _keyform = GlobalKey<FormState>();
+  String placeTitle = '';
+  void addPlace() {
+    if (_keyform.currentState!.validate()) {
+      _keyform.currentState!.save();
+
+      ref.read(userPlaceProvier.notifier).addPlace(placeTitle);
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,6 +40,9 @@ class _PlaceAddState extends State<PlaceAdd> {
           child: Column(
             children: [
               TextFormField(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 decoration: InputDecoration(label: Text('Enter a place name')),
                 validator: (value) {
                   if (value == null || value.isEmpty || value.length >= 50) {
@@ -34,13 +50,26 @@ class _PlaceAddState extends State<PlaceAdd> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  placeTitle = value.toString();
+                },
               ),
               SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () {}, child: Text('Reset')),
-                  ElevatedButton(onPressed: () {}, child: Text('Add Place')),
+                  TextButton(
+                    onPressed: () {
+                      _keyform.currentState!.reset();
+                    },
+                    child: Text('Reset'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      addPlace();
+                    },
+                    child: Text('Add Place'),
+                  ),
                 ],
               ),
             ],
