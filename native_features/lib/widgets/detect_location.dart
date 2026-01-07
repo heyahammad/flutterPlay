@@ -1,16 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:http/http.dart' as http;
+import 'package:native_features/model/place.dart';
 
 class DetectLocation extends StatefulWidget {
-  const DetectLocation({super.key});
+  const DetectLocation({super.key, required this.placeLocation});
+  final void Function(PlaceLocation loc) placeLocation;
 
   @override
   State<DetectLocation> createState() => _DetectLocationState();
 }
 
 class _DetectLocationState extends State<DetectLocation> {
-  LocationData? loc;
   bool loading = false;
+  PlaceLocation? pickedlocation;
+  String? locUrl;
 
   void getCurrentLocation() async {
     Location location = Location();
@@ -40,10 +46,44 @@ class _DetectLocationState extends State<DetectLocation> {
     });
 
     locationData = await location.getLocation();
+
+    double lon = locationData.longitude!;
+    double lat = locationData.latitude!;
+
+    final url = Uri.parse(
+      'https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon',
+    );
+
+    final response = await http.get(
+      url,
+      headers: {'User-Agent': 'com.example.app'},
+    );
+
+    if (response.statusCode == 200) {
+      final info = jsonDecode(response.body);
+      locUrl = Uri.https('maps.geoapify.com', '/v1/staticmap', {
+        'style': 'osm-bright-smooth',
+        'width': '600',
+        'height': '600',
+        'center': 'lonlat:$lon,$lat',
+        'zoom': '14.3497',
+        'marker': 'lonlat:$lon,$lat;type:awesome;color:#bb3f73;size:x-large',
+        'apiKey': 'ff6d177b342d473fa403203f2ae0b987',
+      }).toString();
+      pickedlocation = PlaceLocation(
+        lon: lon,
+        lat: lat,
+        address: info['display_name'].toString(),
+        locUrl: locUrl!,
+      );
+      widget.placeLocation(pickedlocation!);
+    } else {
+      print('error ${response.statusCode}');
+    }
+
     setState(() {
       loading = false;
     });
-    loc = locationData;
   }
 
   @override
@@ -54,9 +94,20 @@ class _DetectLocationState extends State<DetectLocation> {
         color: Theme.of(context).colorScheme.primary,
       ),
     );
+
     if (loading) {
       content = CircularProgressIndicator(
         color: Theme.of(context).colorScheme.primary,
+      );
+    } else if (pickedlocation != null) {
+      content = ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        child: Image.network(
+          locUrl!,
+          fit: BoxFit.cover,
+          height: 600,
+          width: double.infinity,
+        ),
       );
     }
 

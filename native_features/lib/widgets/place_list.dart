@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:native_features/data/dummy_data.dart';
+
 import 'package:native_features/model/place.dart';
 import 'package:native_features/screen/place_screen.dart';
 
@@ -44,6 +44,7 @@ class _PlaceListState extends State<PlaceList> {
                     name: widget.place[index].title,
                     id: widget.place[index].id,
                     image: widget.place[index].image,
+                    placeLocation: widget.place[index].placelocation,
                   ),
                 ),
               ),
