@@ -43,6 +43,7 @@ class _PlaceListState extends State<PlaceList> {
                   builder: (context) => PlaceScreen(
                     name: widget.place[index].title,
                     id: widget.place[index].id,
+                    image: widget.place[index].image,
                   ),
                 ),
               ),
@@ -74,11 +75,16 @@ class _PlaceListState extends State<PlaceList> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.background,
                   ),
-                  child: Text(
-                    widget.place[index].title,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      fontSize: 20,
-                      color: Theme.of(context).colorScheme.primary,
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: FileImage(widget.place[index].image),
+                    ),
+                    title: Text(
+                      widget.place[index].title,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),

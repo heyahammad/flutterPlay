@@ -1,9 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class PlaceScreen extends StatelessWidget {
-  const PlaceScreen({super.key, required this.name, required this.id});
+  const PlaceScreen({
+    super.key,
+    required this.name,
+    required this.id,
+    required this.image,
+  });
   final String name;
   final String id;
+  final File image;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,6 +23,7 @@ class PlaceScreen extends StatelessWidget {
           ),
         ),
       ),
+      body: Center(child: Image.file(image)),
     );
   }
 }

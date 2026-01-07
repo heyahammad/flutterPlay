@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:native_features/model/place.dart';
 import 'package:native_features/provider/place_provider.dart';
+import 'package:native_features/widgets/capture_image.dart';
+import 'package:native_features/widgets/detect_location.dart';
 
 class PlaceAdd extends ConsumerStatefulWidget {
   const PlaceAdd({super.key});
@@ -13,11 +16,13 @@ class PlaceAdd extends ConsumerStatefulWidget {
 class _PlaceAddState extends ConsumerState<PlaceAdd> {
   final _keyform = GlobalKey<FormState>();
   String placeTitle = '';
+  File? cappedImage;
+
   void addPlace() {
     if (_keyform.currentState!.validate()) {
       _keyform.currentState!.save();
 
-      ref.read(userPlaceProvier.notifier).addPlace(placeTitle);
+      ref.read(userPlaceProvier.notifier).addPlace(placeTitle, cappedImage!);
       Navigator.of(context).pop();
     }
   }
@@ -55,6 +60,14 @@ class _PlaceAddState extends ConsumerState<PlaceAdd> {
                 },
               ),
               SizedBox(height: 10),
+              CaptureImage(
+                selectedCapturedImage: (image) {
+                  cappedImage = image;
+                },
+              ),
+              SizedBox(height: 10),
+              DetectLocation(),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
