@@ -35,14 +35,41 @@ class PlaceScreen extends StatelessWidget {
             width: double.infinity,
           ),
           Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 600,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black, Colors.transparent],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
             left: 10,
             right: 10,
-            bottom: 70,
-            child: Container(
-              alignment: Alignment.center,
-              height: 300,
-              width: 200,
-              child: Image.network(placeLocation.locUrl),
+            bottom: 80,
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 100,
+                  backgroundImage: NetworkImage(placeLocation.locUrl),
+                ),
+                SizedBox(height: 10),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width * 0.7,
+                  child: Text(
+                    placeLocation.address,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

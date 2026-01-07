@@ -70,7 +70,7 @@ class _PlaceListState extends State<PlaceList> {
                 },
 
                 child: Container(
-                  height: 80,
+                  height: 100,
                   width: MediaQuery.sizeOf(context).width,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -85,6 +85,13 @@ class _PlaceListState extends State<PlaceList> {
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontSize: 20,
                         color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    subtitle: Text(
+                      widget.place[index].placelocation.address,
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
