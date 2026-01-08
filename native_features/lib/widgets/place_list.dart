@@ -45,6 +45,7 @@ class _PlaceListState extends State<PlaceList> {
                     id: widget.place[index].id,
                     image: widget.place[index].image,
                     placeLocation: widget.place[index].placelocation,
+                    locUrl: widget.place[index].locUrl,
                   ),
                 ),
               ),

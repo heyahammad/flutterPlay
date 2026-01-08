@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:native_features/model/place.dart';
 import 'package:native_features/provider/place_provider.dart';
 import 'package:native_features/screen/place_add.dart';
 import 'package:native_features/widgets/place_list.dart';
@@ -13,6 +14,14 @@ class PlacesScreen extends ConsumerStatefulWidget {
 }
 
 class _PlacesScreenState extends ConsumerState<PlacesScreen> {
+  late Future<void> placefuture;
+
+  @override
+  void initState() {
+    super.initState();
+    placefuture = ref.read(userPlaceProvier.notifier).loadPlace();
+  }
+
   @override
   Widget build(BuildContext context) {
     final places = ref.watch(userPlaceProvier);
@@ -47,7 +56,17 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         ],
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: PlaceList(place: places),
+      body: FutureBuilder(
+        future: placefuture,
+        builder: (context, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              )
+            : PlaceList(place: places),
+      ),
     );
   }
 }

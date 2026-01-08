@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:native_features/model/place.dart';
+import 'package:native_features/widgets/map_view.dart';
 
 class PlaceScreen extends StatelessWidget {
   const PlaceScreen({
@@ -10,11 +11,13 @@ class PlaceScreen extends StatelessWidget {
     required this.id,
     required this.image,
     required this.placeLocation,
+    required this.locUrl,
   });
   final String name;
   final String id;
   final File image;
   final PlaceLocation placeLocation;
+  final String locUrl;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,9 +59,19 @@ class PlaceScreen extends StatelessWidget {
             bottom: 80,
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 100,
-                  backgroundImage: NetworkImage(placeLocation.locUrl),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MapWidget(
+                        location: placeLocation,
+                        isSelecteing: false,
+                      ),
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 100,
+                    backgroundImage: NetworkImage(locUrl),
+                  ),
                 ),
                 SizedBox(height: 10),
                 SizedBox(

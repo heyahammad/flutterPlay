@@ -19,6 +19,7 @@ class _PlaceAddState extends ConsumerState<PlaceAdd> {
   String placeTitle = '';
   File? cappedImage;
   PlaceLocation? placeLoc;
+  String? locUrl;
 
   void addPlace() {
     if (_keyform.currentState!.validate()) {
@@ -26,7 +27,7 @@ class _PlaceAddState extends ConsumerState<PlaceAdd> {
 
       ref
           .read(userPlaceProvier.notifier)
-          .addPlace(placeTitle, cappedImage!, placeLoc!);
+          .addPlace(placeTitle, cappedImage!, placeLoc!, locUrl!);
       Navigator.of(context).pop();
     }
   }
@@ -73,6 +74,9 @@ class _PlaceAddState extends ConsumerState<PlaceAdd> {
               DetectLocation(
                 placeLocation: (loc) {
                   placeLoc = loc;
+                },
+                locUrl: (url) {
+                  locUrl = url;
                 },
               ),
               SizedBox(height: 16),

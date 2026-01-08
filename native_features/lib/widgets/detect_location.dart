@@ -1,13 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:native_features/model/place.dart';
+import 'package:native_features/widgets/map_view.dart';
 
 class DetectLocation extends StatefulWidget {
-  const DetectLocation({super.key, required this.placeLocation});
+  const DetectLocation({
+    super.key,
+    required this.placeLocation,
+    required this.locUrl,
+  });
   final void Function(PlaceLocation loc) placeLocation;
+  final void Function(String url) locUrl;
 
   @override
   State<DetectLocation> createState() => _DetectLocationState();
@@ -16,14 +23,52 @@ class DetectLocation extends StatefulWidget {
 class _DetectLocationState extends State<DetectLocation> {
   bool loading = false;
   PlaceLocation? pickedlocation;
-  String? locUrl;
+  String? lUrl;
+  LocationData? locData;
+
+  void fetchLocImage() async {
+    double lon = locData!.longitude!;
+    double lat = locData!.latitude!;
+
+    final url = Uri.parse(
+      'https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon',
+    );
+
+    final response = await http.get(
+      url,
+      headers: {'User-Agent': 'com.example.app'},
+    );
+
+    if (response.statusCode == 200) {
+      final info = jsonDecode(response.body);
+      lUrl = Uri.https('maps.geoapify.com', '/v1/staticmap', {
+        'style': 'osm-bright-smooth',
+        'width': '600',
+        'height': '600',
+        'center': 'lonlat:$lon,$lat',
+        'zoom': '14.3497',
+        'marker': 'lonlat:$lon,$lat;type:awesome;color:#bb3f73;size:x-large',
+        'apiKey': 'ff6d177b342d473fa403203f2ae0b987',
+      }).toString();
+      pickedlocation = PlaceLocation(
+        lon: lon,
+        lat: lat,
+        address: info['display_name'].toString(),
+      );
+
+      widget.locUrl(lUrl!);
+
+      widget.placeLocation(pickedlocation!);
+    } else {
+      print('error ${response.statusCode}');
+    }
+  }
 
   void getCurrentLocation() async {
     Location location = Location();
 
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-    LocationData locationData;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -45,45 +90,34 @@ class _DetectLocationState extends State<DetectLocation> {
       loading = true;
     });
 
-    locationData = await location.getLocation();
+    locData = await location.getLocation();
 
-    double lon = locationData.longitude!;
-    double lat = locationData.latitude!;
-
-    final url = Uri.parse(
-      'https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon',
-    );
-
-    final response = await http.get(
-      url,
-      headers: {'User-Agent': 'com.example.app'},
-    );
-
-    if (response.statusCode == 200) {
-      final info = jsonDecode(response.body);
-      locUrl = Uri.https('maps.geoapify.com', '/v1/staticmap', {
-        'style': 'osm-bright-smooth',
-        'width': '600',
-        'height': '600',
-        'center': 'lonlat:$lon,$lat',
-        'zoom': '14.3497',
-        'marker': 'lonlat:$lon,$lat;type:awesome;color:#bb3f73;size:x-large',
-        'apiKey': 'ff6d177b342d473fa403203f2ae0b987',
-      }).toString();
-      pickedlocation = PlaceLocation(
-        lon: lon,
-        lat: lat,
-        address: info['display_name'].toString(),
-        locUrl: locUrl!,
-      );
-      widget.placeLocation(pickedlocation!);
-    } else {
-      print('error ${response.statusCode}');
+    if (locData != null) {
+      fetchLocImage();
     }
 
     setState(() {
       loading = false;
     });
+  }
+
+  void selectOnMap() async {
+    final locationData = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(builder: (ctx) => MapWidget(isSelecteing: true)),
+    );
+
+    if (locationData != null) {
+      setState(() {
+        locData = LocationData.fromMap({
+          'latitude': locationData.latitude,
+          'longitude': locationData.longitude,
+        });
+      });
+      getCurrentLocation();
+      fetchLocImage();
+    } else {
+      return;
+    }
   }
 
   @override
@@ -103,7 +137,7 @@ class _DetectLocationState extends State<DetectLocation> {
       content = ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(20)),
         child: Image.network(
-          locUrl!,
+          lUrl!,
           fit: BoxFit.cover,
           height: 600,
           width: double.infinity,
@@ -139,7 +173,9 @@ class _DetectLocationState extends State<DetectLocation> {
             ),
             TextButton.icon(
               icon: Icon(Icons.map),
-              onPressed: () {},
+              onPressed: () {
+                selectOnMap();
+              },
               label: Text('Choose on map'),
             ),
           ],
